@@ -3,115 +3,84 @@
 <html lang="en">
 
 <head>
-	<script>
-		/**
-* @description ttMETA replacement for Web SDK; 
-*         uses alloy.js monitoring hooks to extract meta data from response tokens
-* @usage: initialize before Web SDK calls; 
-*         run `__alloyMeta.get()` to get meta data from experiences; 
-*         customize namespace `(window, "ttMETA")` to use as `ttMETA.get()`
-*         `__alloyMeta.clear()` to reset meta data in SPA if necessary
-*         `__alloyMeta.processFetchData()` and `__alloyMeta.processDisplayData()` process monitoring hooks data
-* @version 0.0.2
-* @support ustymenk@adobe.com
-*/
-((global, metaStore) => {
-  let fetchedExperiences = [],
-    displayedExperiences = [];
-  const add = (uniqueId, obj) => {
-    const existingIndex = fetchedExperiences.findIndex(item => item.uniqueId === uniqueId);
-    if (existingIndex !== -1) {
-      fetchedExperiences[existingIndex].data["Modifications"].push(obj["Modifications"]);
-    } else {
-      fetchedExperiences.push({
-        uniqueId,
-        data: obj
-      });
-    }
-  };
-  const mark = uniqueId => {
-    const entry = fetchedExperiences.find(item => item.uniqueId === uniqueId);
-    if (entry) {
-      displayedExperiences.push({
-        ...entry
-      });
-    }
-  };
-  global[metaStore] = {
-    get: () => {
-      let result = [];
-      displayedExperiences.forEach(obj => {
-        result.push(obj.data);
-      });
-      return result;
-    },
-    clear: () => {
-      fetchedExperiences = [];
-      displayedExperiences = [];
-    },
-    processFetchData: data => {
-      let handles = data?.parsedBody?.handle;
-      if (handles && handles.length) {
-        handles.forEach(handle => {
-          if (handle.type === "personalization:decisions") {
-            let payloadList = handle.payload;
-            if (payloadList && payloadList.length) {
-              payloadList.forEach(payload => {
-                let items = payload.items;
-                if (items && items.length) {
-                  items.forEach(item => {
-                    let meta = item.meta;
-                    if (meta["activity.id"] && meta["experience.id"]) {
-                      const uniqueId = meta["activity.id"] + ":" + meta["experience.id"];
-                      add(uniqueId, {
-                        "ActivityID": meta["activity.id"] || "",
-                        "ActivityName": meta["activity.name"] || "",
-                        "ExperienceID": meta["experience.id"] || "",
-                        "ExperienceName": meta["experience.name"] || "",
-                        "OfferID": meta["offer.id"] || "",
-                        "OfferName": meta["offer.name"] || "",
-                        "Scope": payload?.scope || "",
-                        "Modifications": [{
-                          "Modification": item?.data?.type || "",
-                          "Mod Selector": item?.data?.selector || ""
-                        }]
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          }
-        });
+  <script>
+    window.__alloyMonitors = window.__alloyMonitors || [];
+    window.__alloyMonitors.push({
+      onInstanceCreated(data) {
+        // data.instanceName
+        // data.instance
+      },
+      onInstanceConfigured(data) {
+        // data.instanceName
+        // data.config
+      },
+      onBeforeCommand(data) {
+        // data.instanceName
+        // data.commandName
+        // data.options
+      },
+      // Added in version 2.4.0
+      onCommandResolved(data) {
+        // data.instanceName
+        // data.commandName
+        // data.options
+        // data.result
+      },
+      // Added in version 2.4.0
+      onCommandRejected(data) {
+        // data.instanceName
+        // data.commandName
+        // data.options
+        // data.error
+      },
+      onBeforeNetworkRequest(data) {
+        // data.instanceName
+        // data.requestId
+        // data.url
+        // data.payload
+      },
+      onNetworkResponse(data) {
+        // data.instanceName
+        // data.requestId
+        // data.url
+        // data.payload
+        // data.body
+        // data.parsedBody
+        // data.status
+        // data.retriesAttempted
+      },
+      onNetworkError(data) {
+        // data.instanceName
+        // data.requestId
+        // data.url
+        // data.payload
+        // data.error
+      },
+      onBeforeLog(data) {
+        // data.instanceName
+        // data.componentName
+        // data.level
+        // data.arguments
       }
-    },
-    processDisplayData: data => {
-      let events = data?.payload?.events;
-      if (events && events.length) {
-        events.forEach(event => {
-          let propositions = event?.xdm?._experience?.decisioning?.propositions;
-          if (propositions && propositions.length) {
-            propositions.forEach(proposition => {
-              const scopeDetails = proposition?.scopeDetails;
-              const uniqueId = scopeDetails?.activity?.id + ":" + scopeDetails?.experience?.id;
-              mark(uniqueId);
-            });
-          }
-        });
+      onContentRendering(data) {
+        // data.instanceName
+        // data.componentName
+        // data.payload
+        console.log(data.status)
+      },
+      onContentHiding(data) {
+        // data.instanceName
+        // data.componentName
+        // data.status
       }
-    }
-  };
-})(window, "__alloyMeta");
-window.__alloyMonitors = window.__alloyMonitors || [];
-window.__alloyMonitors.push({
-  onBeforeNetworkRequest(data) {
-    __alloyMeta.processDisplayData(data);
-  },
-  onNetworkResponse(data) {
-    __alloyMeta.processFetchData(data);
-  }
-});
-</script>
+    });
+  </script>
+  <script>
+      !function(n,o){o.forEach(function(o){n[o]||((n.__alloyNS=n.__alloyNS||
+      []).push(o),n[o]=function(){var u=arguments;return new Promise(
+      function(i,l){n[o].q.push([i,l,u])})},n[o].q=[])})}
+      (window,["alloy"]);
+    </script>
 	<title>Launch, by Adobe: Sample HTML Page</title>
 
 
